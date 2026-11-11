@@ -1,17 +1,27 @@
-pandas
-numpy
-torch
-transformers
+# Deep Learning & NLP core
+torch>=2.0.0
+transformers>=4.41.0,<5.0.0
+tokenizers>=0.19.0,<0.20.0
+accelerate
 sentencepiece
 protobuf
+
+# Vietnamese NLP & File Processing
 underthesea
-PyMuPDF
+pymupdf
 python-docx
+
+# Embedding & Ranking
 sentence-transformers
 scikit-learn
+
+# Web UI & API
+streamlit
 fastapi
 uvicorn
-streamlit
+
+# Evaluation & Utilities
+datasets
 evaluate
 sacrebleu
 rouge-score
