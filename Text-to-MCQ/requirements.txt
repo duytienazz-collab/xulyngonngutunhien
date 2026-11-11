@@ -1,0 +1,17 @@
+pandas
+numpy
+torch
+transformers
+sentencepiece
+protobuf
+underthesea
+PyMuPDF
+python-docx
+sentence-transformers
+scikit-learn
+fastapi
+uvicorn
+streamlit
+evaluate
+sacrebleu
+rouge-score

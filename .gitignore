@@ -1,0 +1,20 @@
+# Python virtual environments
+venv/
+venv*/
+.venv/
+Text-to-MCQ/venv311/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# API keys and environment variables
+.env
+.env.*
+!.env.example
+
+# Large model weights
+*.safetensors
+*.pt
+*.pth
+*.ckpt
