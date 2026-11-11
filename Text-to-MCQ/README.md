@@ -1,101 +1,83 @@
-<!-- # HỆ THỐNG TỰ ĐỘNG SINH CÂU HỎI TRẮC NGHIỆM TIẾNG VIỆT (TEXT-TO-MCQ)
+<!-- HƯỚNG DẪN CÀI ĐẶT VÀ CHẠY HỆ THỐNG TEXT-TO-MCQ
+1. YÊU CẦU HỆ THỐNG (Prerequisites)
+Trước khi bắt đầu, máy tính của bạn cần đáp ứng các điều kiện sau:
 
-Đồ án môn học Xử lý Ngôn ngữ Tự nhiên (NLP).
-Hệ thống chuyển đổi văn bản tiếng Việt (PDF, DOCX, TXT) thành bộ câu hỏi trắc nghiệm (MCQ) 4 lựa chọn, sử dụng mô hình ngôn ngữ **ViT5 Fine-tuned** kết hợp thư viện **Underthesea** và cơ chế **Validation** khắt khe để đảm bảo chất lượng đầu ra.
+Hệ điều hành: Windows 10/11, macOS, hoặc Ubuntu.
 
----
+Python: Phiên bản 3.10 hoặc 3.11 (Khuyến nghị dùng 3.11). Tuyệt đối không dùng Python 3.12+ vì dễ lỗi thư viện AI.
 
-## 🛠️ 1. YÊU CẦU HỆ THỐNG
-- **Hệ điều hành:** Windows, macOS, hoặc Linux.
-- **Python:** Phiên bản `3.10` hoặc `3.11` (Khuyến nghị dùng 3.11).
-- **RAM:** Tối thiểu 8GB (Chạy mô hình trên CPU).
-- **Mô hình đã huấn luyện:** Bắt buộc phải có thư mục `vit5_qg` (đã được train trên Google Colab) đặt đúng vị trí.
+RAM: Tối thiểu 8GB (Khuyến nghị 16GB nếu chạy mô hình PhoBERT).
 
----
+Dung lượng ổ cứng: Cần trống ít nhất 5GB để tải các mô hình (ViT5, PhoBERT, SBERT).
 
-## 📂 2. CẤU TRÚC THƯ MỤC QUAN TRỌNG
-Trước khi chạy, hãy chắc chắn bạn đã tải mô hình từ Google Drive về và đặt đúng chỗ:
-```text
-Text-to-MCQ/
-├── app/                  # Chứa toàn bộ source code xử lý (Backend)
-│   ├── modules/          # Các module NLP (Đọc file, Chunking, Extractor, Generator...)
-│   └── services/         # Pipeline Service kết nối các module
-├── frontend/             # Chứa code giao diện Web
-│   └── streamlit_app.py  # File chạy giao diện chính
-├── models/
-│   └── vit5_qg/          # <-- BẮT BUỘC: Thư mục chứa mô hình ViT5 đã train
-├── datasets/             # Chứa dữ liệu test (nếu có)
-└── requirements.txt      # Danh sách thư viện cần cài đặt
-🚀 3. HƯỚNG DẪN CÀI ĐẶT (Lần đầu tiên)
-Mở Terminal trên VS Code (Ctrl + ~ hoặc Terminal -> New Terminal), đảm bảo đang đứng ở thư mục gốc Text-to-MCQ và chạy lần lượt các lệnh sau:
+Kết nối Internet: Cần thiết cho lần chạy đầu tiên để tải các mô hình từ Hugging Face.
 
-Bước 3.1: Tạo môi trường ảo (Virtual Environment)
+2. CÀI ĐẶT MÔI TRƯỜNG
+Bước 2.1: Mở Terminal / Command Prompt
+Mở cửa sổ dòng lệnh và di chuyển đến thư mục chứa source code của dự án (thư mục Text-to-MCQ).
+
+bash
+cd đường_dẫn_đến_thư_mục/Text-to-MCQ
+Bước 2.2: Tạo môi trường ảo (Virtual Environment)
+Việc này giúp cô lập các thư viện của dự án, tránh làm hỏng môi trường Python chung của máy.
 
 bash
 python -m venv venv
-Bước 3.2: Kích hoạt môi trường ảo
-
+Bước 2.3: Kích hoạt môi trường ảo
 Nếu dùng Windows (PowerShell):
 
 powershell
 .\venv\Scripts\Activate.ps1
+(Nếu bị lỗi Execution Policy, hãy chạy lệnh Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass trước).
+
 Nếu dùng Windows (CMD):
 
 cmd
 .\venv\Scripts\activate.bat
-Nếu dùng Mac/Linux:
+Nếu dùng macOS / Linux:
 
 bash
 source venv/bin/activate
 (Khi kích hoạt thành công, bạn sẽ thấy chữ (venv) xuất hiện ở đầu dòng lệnh).
 
-Bước 3.3: Cài đặt các thư viện
+3. CÀI ĐẶT THƯ VIỆN (Dependencies)
+
+Bước 3: Tiến hành cài đặt
+Chạy lệnh sau để cài toàn bộ thư viện (Quá trình này mất khoảng 3-5 phút):
 
 bash
 pip install --upgrade pip
 pip install -r requirements.txt
-(Lưu ý: Nếu bạn chưa có file requirements.txt, hãy chạy lệnh sau để cài trực tiếp: pip install "transformers>=4.41.0,<5.0.0" "tokenizers>=0.19.0,<0.20.0" datasets evaluate sacrebleu rouge-score accelerate sentencepiece protobuf underthesea pymupdf python-docx sentence-transformers scikit-learn fastapi uvicorn streamlit)
+⚠️ CẢNH BÁO LỖI THƯỜNG GẶP:
+Nếu bạn thấy lỗi liên quan đến tokenizers (như lỗi link.exe trên Windows), hãy chạy lệnh sau để ép pip tải bản đã biên dịch sẵn:
+pip install tokenizers==0.19.1 --only-binary :all:
 
-🏃 4. HƯỚNG DẪN CHẠY CHƯƠNG TRÌNH
-4.1. Chạy Giao diện Web (Dành cho Demo / Bảo vệ đồ án)
-Đảm bảo Terminal đang ở trong môi trường ảo (venv) và đứng ở thư mục gốc. Chạy lệnh:
+5. CHẠY CHƯƠNG TRÌNH
+Có 2 cách để chạy hệ thống, tùy thuộc vào mục đích của bạn:
+
+Cách 1: Chạy Giao diện Web (Dành cho Demo / Bảo vệ đồ án)
+Đây là cách chạy đẹp mắt nhất để thầy cô xem sản phẩm. Đảm bảo Terminal đang ở trong môi trường (venv) và đứng ở thư mục gốc, chạy lệnh:
 
 bash
 streamlit run frontend/streamlit_app.py
-Trình duyệt sẽ tự động mở lên tại địa chỉ http://localhost:8501.
+Trình duyệt web sẽ tự động mở lên tại địa chỉ http://localhost:8501.
 
-Kéo thả file PDF/DOCX/TXT vào vùng tải lên.
+Lần chạy đầu tiên: Hệ thống sẽ mất khoảng 2-5 phút để tải các mô hình ngôn ngữ (ViT5, PhoBERT, SBERT) về máy. Các lần sau sẽ chạy ngay lập tức.
 
-Chọn số lượng câu hỏi.
+Bạn chỉ cần kéo thả file PDF/DOCX/TXT vào và bấm "Bắt đầu tạo câu hỏi".
 
-Bấm "Bắt đầu tạo câu hỏi".
-
-4.2. Chạy Test tự động bằng dòng lệnh (Dành cho Debug)
-Nếu bạn muốn kiểm tra Pipeline hoạt động đúng không mà không cần mở Web, hãy chạy file test:
+Cách 2: Chạy Test tự động bằng dòng lệnh (Dành cho Debug)
+Nếu bạn muốn kiểm tra xem Pipeline có hoạt động đúng không mà không cần mở Web, hãy chạy file test:
 
 bash
 python test_nlp.py
-(Kết quả JSON của đề thi sẽ được in trực tiếp ra màn hình Terminal).
+(Kết quả JSON của đề thi sẽ được in trực tiếp ra màn hình Terminal, kèm theo các log thông báo quá trình lọc dữ liệu).
 
-⚠️ 5. XỬ LÝ LỖI THƯỜNG GẶP (Troubleshooting)
-Lỗi 1: ModuleNotFoundError: No module named 'app'
-
-Nguyên nhân: Bạn đang chạy file Streamlit từ sai thư mục.
-
-Khắc phục: Luôn đảm bảo bạn đang đứng ở thư mục gốc Text-to-MCQ khi gõ lệnh streamlit run ....
-
-Lỗi 2: TypeError: 'dict' object is not an instance of 'Sequence' (Lỗi tokenizer)
-
-Nguyên nhân: Xung đột phiên bản transformers và tokenizers.
-
-Khắc phục: Chạy lại lệnh sau để đồng bộ phiên bản:
-
-bash
-pip install "transformers>=4.41.0,<5.0.0" "tokenizers>=0.19.0,<0.20.0"
-Lỗi 3: FileNotFoundError: ./models/vit5_qg
-
-Nguyên nhân: Chưa tải mô hình từ Google Colab về máy.
-
-Khắc phục: Vào Google Drive, tải thư mục vit5_qg (chứa các file config.json, model.safetensors, tokenizer.json...) và ném vào thư mục 
-models/
- của dự án. -->
+6. XỬ LÝ LỖI THƯỜNG GẶP (Troubleshooting)
+Lỗi	Nguyên nhân	Cách khắc phục
+ModuleNotFoundError: No module named 'app'	Đang đứng sai thư mục khi chạy Streamlit.	Đảm bảo Terminal đang ở thư mục gốc Text-to-MCQ trước khi gõ lệnh streamlit run ....
+TypeError: 'dict' object is not an instance of 'Sequence'	Xung đột phiên bản transformers và tokenizers.	Chạy lại: pip install "transformers>=4.41.0,<5.0.0" "tokenizers>=0.19.0,<0.20.0"
+FileNotFoundError: ./models/vit5_qg	Chưa tải mô hình ViT5 từ Google Drive về.	Xem lại Mục 4 để tải và đặt mô hình đúng vị trí.
+Web báo: "Không thể tạo câu hỏi đạt chuẩn"	Bộ lọc Validation quá khắt khe hoặc văn bản quá ngắn/ít thực thể.	Đây không phải lỗi, hệ thống đang ưu tiên chất lượng. Hãy thử upload một file PDF dài hơn (bài báo, giáo trình) có nhiều tên riêng/địa danh/số liệu.
+Web bị "đơ" ở lần chạy đầu tiên	Hệ thống đang ngầm tải mô hình PhoBERT và SBERT (dung lượng lớn).	Đợi khoảng 2-5 phút tùy tốc độ mạng. Lần sau sẽ chạy rất nhanh.
+ -->
